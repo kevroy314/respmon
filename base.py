@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 import scipy.fftpack
 import scipy.signal
@@ -98,43 +97,3 @@ def show_frequencies(vid_data, fps, bounds=None):
     pyplot.plot(freqs, abs(fft))
 
     pyplot.show()
-
-
-def gaussian_video(video, shrink_multiple):
-    """Create a gaussian representation of a video"""
-    vid_data = None
-    for x in range(0, video.shape[0]):
-        frame = video[x]
-        gauss_copy = np.ndarray(shape=frame.shape, dtype="float")
-        gauss_copy[:] = frame
-        for i in range(shrink_multiple):
-            gauss_copy = cv2.pyrDown(gauss_copy)
-
-        if x == 0:
-            vid_data = np.zeros((video.shape[0], gauss_copy.shape[0], gauss_copy.shape[1], 3))
-        vid_data[x] = gauss_copy
-    return vid_data
-
-
-def laplacian_video(video, shrink_multiple):
-    vid_data = None
-    frame_count, height, width, colors = video.shape
-
-    for i, frame in enumerate(video):
-        gauss_copy = np.ndarray(shape=frame.shape, dtype="float")
-        gauss_copy[:] = frame
-        prev_copy = None
-        for _ in range(shrink_multiple):
-            prev_copy = gauss_copy[:]
-            gauss_copy = cv2.pyrDown(gauss_copy)
-
-        laplacian = None
-        if prev_copy is not None:
-            laplacian = prev_copy - cv2.pyrUp(gauss_copy)
-
-        if laplacian is not None:
-            if vid_data is None:
-                vid_data = np.zeros((frame_count, laplacian.shape[0], laplacian.shape[1], 3))
-            vid_data[i] = laplacian
-
-    return vid_data

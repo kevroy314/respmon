@@ -9,12 +9,13 @@ from collections import deque
 from base import eulerian_magnification_bandpass
 from transforms import uint8_to_float, float_to_uint8
 import scipy.signal as signal
+import scipy.stats as stats
 from scipy.optimize import least_squares
 import peakutils
 import parabolic
 
-# TODO: Large motion error detection (hard threshold?)
-# TODO: Hyperparameter optimization for stability (pull data from youtube)
+# TODO: Large motion error detection (dynamic threshold and shape goodness-of-fit)
+# TODO: Hyperparameter optimization for stability (pull data from webcams)
 
 
 def freq_from_fft(sig, fs):
@@ -131,7 +132,21 @@ def fit_sine(_data, _t, min_least_squares_length=10):
     return est_std, est_phase, est_mean, est_freq, cost
 
 
-def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', fig_size=None):
+def get_confidence_intervals(sample, value, ci):
+    std = np.mean(sample)
+    z_critical = stats.norm.ppf(q=1.0-((1.0-ci)/2.0))
+    margin_of_error = z_critical * (std / np.sqrt(len(sample)))
+    return value - margin_of_error, value + margin_of_error
+
+
+def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', fig_size=None, fps_limit=10):
+    assert isinstance(fps_limit, (int, float)), "fps_limit must be int or float"
+    assert isinstance(save_calibration_image, bool), "save_calibration_image must be bool"
+    assert visualize == 'pyqtgraph' or visualize is None, \
+        "visualize must be 'pyqtgraph' or None"
+    assert fig_size is None or (isinstance(fig_size, (tuple, list)) and len(fig_size) == 2), \
+        "fig_size should be None or length 2 tuple or list"
+
     # Initialize Capture
     # noinspection PyArgumentList
     cap = cv2.VideoCapture(capture_target)
@@ -141,43 +156,34 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
 
     if fps == 0:
         fps = np.nan
-    limit_fps = 10
 
     maximum_bounding_box_area = np.inf  # Adjust to speed up program if the bounding box areas are ending up too large
+    min_peak_index_frequency = 2.0  # Limits peak frequency to 2Hz # Hyperparameter
 
     # Calibration Variables
-    calibration_buffer_target_length = 128
+    calibration_buffer_target_length = 128  # Hyperparameter
     calibration_buffer = np.zeros((calibration_buffer_target_length, height, width), dtype=float)
     calibration_buffer_idx = 0
+    freq_min = 0.1  # Hyperparameter
+    freq_max = 1.0  # Hyperparameter
+    temporal_threshold = 0.7  # Hyperparameter
+    threshold = 20  # Hyperparameter
 
     # Target Bounding Box
     # noinspection PyUnusedLocal
     x, y, w, h = None, None, None, None
 
     # Measurement Variables
-    min_peak_index_distance = int(np.round(fps / 2.))  # Limits peak frequency to 2Hz
-    measure_buffer_length = 128
-    measure_initialization_length = 32
-    max_peak_detection_threshold_proportion = 0.2
+    measure_buffer_length = 128  # Hyperparameter
+    measure_initialization_length = 32  # Hyperparameter
+    max_peak_detection_threshold_proportion = 0.2  # Hyperparameter
+    confidence_interval = 0.95  # Hyperparameter
     data = deque()
     t = deque()
     freq = deque()
+    confidence = deque()
 
-    if visualize == 'matplotlib':
-        import matplotlib.pyplot as plt
-        # UI Variables
-        if fig_size is None:
-            f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(13, 8))
-        else:
-            f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=fig_size)
-        f.set_figheight(13)
-        f.set_figwidth(21)
-        ax1_2 = ax1.twinx()
-
-        subplots = [ax1, ax1_2, ax2, ax3]
-        plt.ion()
-        f.show()
-    elif visualize == 'pyqtgraph':
+    if visualize == 'pyqtgraph':
         from pyqtgraph.Qt import QtGui
         import pyqtgraph as pg
 
@@ -199,6 +205,10 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
 
         curve0 = p0.plot(pen='y')
         curve3 = p0.plot(pen=None, symbolBrush=(255, 0, 0), symbolPen=None)
+        curve4 = p0.plot(pen='w')
+        curve5 = p0.plot(pen='w')
+        curve6 = pg.FillBetweenItem(curve4, curve5, (255, 0, 0, 100))
+        p0.addItem(curve6)
 
         view = layout.addViewBox()
         view.setAspectLocked(True)
@@ -218,7 +228,8 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
         p2.addItem(text)
         text.setPos(0, 0)
 
-        curves = [curve0, img, curve2, curve3, text]
+        curves = {"raw_signal": curve0, "capture_image": img, "frequency_plot": curve2, "peak_plot": curve3,
+                  "bpm_text": text, "top_confidence_interval": curve4, "bottom_confidence_interval": curve5}
 
     # State Machine State
     # noinspection PyUnusedLocal
@@ -239,10 +250,6 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
     while cap.isOpened():
         loop_start_time = time.time()
 
-        if visualize == 'matplotlib':
-            # Clear the UI
-            [ax.clear() for ax in subplots]
-
         # Capture the frame (quit if the frame is a bool, meaning end of stream)
         frame = next_frame(cap)
         if isinstance(frame, bool):
@@ -256,17 +263,12 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
                 y = [1] * calibration_buffer_idx + [0] * (calibration_buffer_target_length - calibration_buffer_idx)
                 x = list(range(0, calibration_buffer_target_length))
 
-                if visualize == 'matplotlib':  # Update plot for calibration
-                    plt.suptitle('Capturing calibration frames...')
-                    ax1.fill_between(x, 0, y)
-                    ax2.imshow(frame)
-                    ax3.fill_between(x, 0, list(reversed(y)))
-                elif visualize == 'pyqtgraph':
+                if visualize == 'pyqtgraph':
                     # noinspection PyUnboundLocalVariable
                     win.setWindowTitle(
                         'Capturing calibration frames... {0}/{1}'.format(calibration_buffer_idx,
                                                                          calibration_buffer_target_length))
-                    curves[1].setImage(frame)
+                    curves["capture_image"].setImage(frame)
 
                 # Fill frame buffer
                 calibration_buffer[calibration_buffer_idx][:] = frame
@@ -275,19 +277,20 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
                 calibration_pbar.update(1)
             # Once enough images have been acquired, the locate function is run to find the ROI
             else:
-                if visualize == 'matplotlib':  # Update Status
-                    plt.suptitle('Calibrating (may take several seconds)...')
-                elif visualize == 'pyqtgraph':
+                if visualize == 'pyqtgraph':
                     # noinspection PyUnboundLocalVariable
                     win.setWindowTitle('Calibrating (may take several seconds)...')
                 logging.info("Finished capturing calibration frames. Beginning calibration...")
                 t1 = time.time()
-                if fps == 0:
+                if fps == 0 or fps is np.nan:
                     fps = calibration_buffer_target_length / (t1 - t0)
                     logging.info("Computer FPS as {0}.".format(fps))
-                if fps > limit_fps:
-                    fps = limit_fps
-                location = locate(calibration_buffer, fps, save_calibration_image=save_calibration_image)
+                if fps > fps_limit:
+                    fps = fps_limit
+                min_peak_index_distance = int(np.round(fps / min_peak_index_frequency))  # Limits peak frequency to 2Hz
+                location = locate(calibration_buffer, fps, save_calibration_image=save_calibration_image,
+                                  freq_min=freq_min, freq_max=freq_max,
+                                  temporal_threshold=temporal_threshold, threshold=threshold)
                 if location is None:
                     logging.info("Failed finding ROI during calibration. Retrying...")
                     calibration_buffer_idx = 0
@@ -298,22 +301,17 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
                 logging.info("Beginning measuring...")
                 calibration_pbar.update(1)
                 calibration_pbar.close()
-                if visualize == 'matplotlib':  # Update Status
-                    ax1.set_title('Intensity Measurement')
-                    ax3.set_title('Frequency Measurement (BPM)')
-                elif visualize == 'pyqtgraph':
-                    # noinspection PyUnboundLocalVariable
-                    p2.enableAutoRange('xy', True)
+                if visualize == 'pyqtgraph':
                     win.setWindowTitle('Measuring...')
                 state = 'measure'
         elif state == 'measure':
             # Crop to the bounding box
             crop_img = frame[y: y + h, x: x + w]
             # Check for full buffer and popleft
-            if len(data) > measure_buffer_length:
-                data.popleft()
-                t.popleft()
-                freq.popleft()
+            buffers = [data, confidence, t, freq]
+            for b in buffers:
+                if len(b) > measure_buffer_length:
+                    b.popleft()
             # Average the cropped image pixels
             avg = np.average(crop_img)
 
@@ -325,15 +323,11 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
                 t.append(t[-1] + (1. / fps))
 
             if len(data) > measure_initialization_length:
-                # Sine fitting
-                # est_std, est_phase, est_mean, est_freq, cost = fit_sine(data, t) # TODO: This is too slow/inaccurate
-                # recreate the fitted curve using the optimized parameters
-                # data_fit = est_std * np.sin(est_freq * np.array(t) + est_phase) + est_mean
-
-                # FFT frequency analysis
-                # est_freq = freq_from_fft(data, 1. / fps) * 60 * fps # TODO: This isn't working at all...
+                # Generate confidence intervals
+                confidence.append(get_confidence_intervals(data, data[-1], confidence_interval))
 
                 # Peak detection
+                # noinspection PyUnboundLocalVariable
                 indices = peakutils.indexes(np.array(data),
                                             thres=max_peak_detection_threshold_proportion / max(data),
                                             min_dist=min_peak_index_distance)
@@ -345,48 +339,36 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
                     interval = np.mean(diffs)
                 est_freq = 1.0/interval * 60.0  # 60 seconds in a minute
 
-                if visualize == 'matplotlib':  # Visualize peaks
-                    ax1.scatter(x=peak_times, y=np.take(data, indices), c='r', marker='x')
                 if visualize == 'pyqtgraph':
-                    curves[3].setData(peak_times, np.take(data, indices))
+                    curves["peak_plot"].setData(peak_times, np.take(data, indices))
 
                 freq.append(est_freq)
-            else:
-                freq.append(np.nan)
 
-            if visualize == 'matplotlib':  # Visualize the measurement
-                # Fill the UI
-                ax1.plot(t, data, c='b')
-                # ax1_2.plot(t, data_fit, c='g')
-                ax2.imshow(crop_img)
-                ax3.plot(t, freq, c='r')
-
-                if freq[-1] is np.nan:
-                    plt.suptitle('Initializing...')
-                else:
-                    plt.suptitle('{0:#.4} BPM'.format(freq[-1]))
-            elif visualize == 'pyqtgraph':
+            if visualize == 'pyqtgraph':
                 if len(data) >= 2 and len(t) >= 2:
-                    curves[0].setData(t, data)
-                curves[1].setImage(crop_img)
-                freq_no_nan = [x for x in freq if x is not np.nan]
-                if len(freq_no_nan) >= 2 and len(t) >= 2:
-                    curves[2].setData(np.array(t)[-len(freq_no_nan):], freq_no_nan)
-                curves[4].setText('{0:#.4} BPM'.format(freq[-1]))
+                    curves["raw_signal"].setData(t, data)
+                curves["capture_image"].setImage(crop_img)
+                if len(freq) >= 2 and len(t) >= 2:
+                    # noinspection PyUnboundLocalVariable
+                    p2.enableAutoRange('xy', True)
+                    curves["frequency_plot"].setData(np.array(t)[-len(freq):], freq)
+                    curves["bpm_text"].setText('{0:#.4} BPM'.format(freq[-1]))
+                if len(confidence) >= 2:
+                    ci_top, ci_bottom = np.transpose(confidence)
+                    ci_t = np.array(t)[-len(ci_top):]
+                    curves["top_confidence_interval"].setData(ci_t, ci_top)
+                    curves["bottom_confidence_interval"].setData(ci_t, ci_bottom)
 
             if detect_errors():  # TODO: Finish error handler
                 state = 'calibration'
 
-        if visualize == 'matplotlib':  # Prevent always on top
-            # noinspection PyUnboundLocalVariable
-            f.canvas.flush_events()
-        elif visualize == 'pyqtgraph':
+        if visualize == 'pyqtgraph':
             # noinspection PyUnboundLocalVariable
             pg.QtGui.QApplication.processEvents()
 
         fps_x = fps
-        if fps == np.nan:
-            fps_x = limit_fps
+        if fps is np.nan:
+            fps_x = fps_limit
         sleep_time = (1.0 / fps_x) - (time.time() - loop_start_time)
         if sleep_time > 0:
             time.sleep(sleep_time)

@@ -28,10 +28,6 @@ def create_laplacian_image_pyramid(image, pyramid_levels):
     return laplacian_pyramid
 
 
-def create_gaussian_video_pyramid(video, pyramid_levels):
-    return _create_pyramid(video, pyramid_levels, create_gaussian_image_pyramid)
-
-
 def create_laplacian_video_pyramid(video, pyramid_levels):
     return _create_pyramid(video, pyramid_levels, create_laplacian_image_pyramid)
 
