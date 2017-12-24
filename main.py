@@ -14,7 +14,7 @@ from scipy.optimize import least_squares
 import peakutils
 import parabolic
 
-# TODO: Large motion error detection (dynamic threshold and shape goodness-of-fit)
+# TODO: Shape/goodness-of-fit error detection
 # TODO: Hyperparameter optimization for stability (pull data from webcams)
 
 
@@ -94,7 +94,12 @@ def next_frame(capture_object):
         return False
 
 
-def detect_errors():
+def detect_errors(data, confidence):
+    if len(data) >= 1 and len(confidence) >= 2:
+        low, high = sorted(confidence[-2])
+        if data[-1] < low or data[-1] > high:
+            return True
+
     return False
 
 
@@ -139,13 +144,16 @@ def get_confidence_intervals(sample, value, ci):
     return value - margin_of_error, value + margin_of_error
 
 
-def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', fig_size=None, fps_limit=10):
+def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', fig_size=None, fps_limit=10,
+         error_reset_delay=10.0):
     assert isinstance(fps_limit, (int, float)), "fps_limit must be int or float"
     assert isinstance(save_calibration_image, bool), "save_calibration_image must be bool"
     assert visualize == 'pyqtgraph' or visualize is None, \
         "visualize must be 'pyqtgraph' or None"
     assert fig_size is None or (isinstance(fig_size, (tuple, list)) and len(fig_size) == 2), \
         "fig_size should be None or length 2 tuple or list"
+    assert isinstance(error_reset_delay, (int, float)) and error_reset_delay >= 0, \
+        "error_reset_delay must be a positive int or float"
 
     # Initialize Capture
     # noinspection PyArgumentList
@@ -229,7 +237,8 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
         text.setPos(0, 0)
 
         curves = {"raw_signal": curve0, "capture_image": img, "frequency_plot": curve2, "peak_plot": curve3,
-                  "bpm_text": text, "top_confidence_interval": curve4, "bottom_confidence_interval": curve5}
+                  "bpm_text": text, "top_confidence_interval": curve4, "bottom_confidence_interval": curve5,
+                  "fill_confidence_interval": curve6}
 
     # State Machine State
     # noinspection PyUnusedLocal
@@ -344,6 +353,19 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
 
                 freq.append(est_freq)
 
+                if detect_errors(data, confidence):
+                    state = 'calibration'
+                    calibration_buffer_idx = 0
+                    data.clear()
+                    confidence.clear()
+                    freq.clear()
+                    t.clear()
+                    for key in curves:
+                        if callable(getattr(curves[key], "clear", None)):
+                            curves[key].clear()
+                    win.setWindowTitle('Error detected, waiting {0}s before recalibrating...'.format(error_reset_delay))
+                    time.sleep(error_reset_delay)
+
             if visualize == 'pyqtgraph':
                 if len(data) >= 2 and len(t) >= 2:
                     curves["raw_signal"].setData(t, data)
@@ -358,9 +380,6 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
                     ci_t = np.array(t)[-len(ci_top):]
                     curves["top_confidence_interval"].setData(ci_t, ci_top)
                     curves["bottom_confidence_interval"].setData(ci_t, ci_bottom)
-
-            if detect_errors():  # TODO: Finish error handler
-                state = 'calibration'
 
         if visualize == 'pyqtgraph':
             # noinspection PyUnboundLocalVariable
@@ -379,5 +398,5 @@ def main(capture_target=0, save_calibration_image=False, visualize='pyqtgraph', 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s :: %(message)s", level=logging.INFO)
     # noinspection PyTypeChecker
-    main(capture_target=r"C:\Users\kevin\Desktop\Video Magnification Videos\timber.mp4", save_calibration_image=True)
-    # main(capture_target=0, save_calibration_image=True)
+    # main(capture_target=r"C:\Users\kevin\Desktop\Video Magnification Videos\timber.mp4", save_calibration_image=True)
+    main(capture_target=0, save_calibration_image=True)
