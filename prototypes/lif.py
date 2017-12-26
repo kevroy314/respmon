@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
+import peakutils
 
 
 def lif(_x, _offset=0, _x_offset=0, _scale=1, _k=1, _t=1.5):
@@ -46,7 +47,8 @@ def update(val):
     _scale = sscale.val
     _k = sk.val
     _thresh = sthresh.val
-    l.set_ydata([lif(x, _offset, _x_offset, _scale, _k, _thresh) for x in t])
+    # l.set_ydata([lif(x, _offset, _x_offset, _scale, _k, _thresh) for x in t])
+    l.set_ydata([peakutils.gaussian(x, _offset, _x_offset, _scale) for x in t])
     fig.canvas.draw_idle()
 
 

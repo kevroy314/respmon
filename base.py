@@ -10,6 +10,7 @@ import scipy.stats as stats
 from collections import deque
 from pyqtgraph.Qt import QtGui
 from prototypes.detect_peaks import detect_peaks
+from prototypes.signal_measurement import find_peaks_simplified
 from scipy.optimize import least_squares
 from transforms import uint8_to_float, float_to_uint8, temporal_bandpass_filter_fft
 from pyramid import create_laplacian_video_pyramid, collapse_laplacian_video_pyramid
@@ -148,7 +149,7 @@ class RespiratoryMonitor:
         self.measure_buffer_length = 128  # Hyperparameter; The buffer length for the measurement stream
         self.measure_initialization_length = 32  # Hyperparameter; The number of frames to wait for to being measuring
         self.max_peak_detection_threshold_proportion = 0.  # Hyperparameter; The maximum peak height threshold
-        self.confidence_interval = 0.95  # Hyperparameter; The confidence interval for large motion
+        self.confidence_interval = 0.99  # Hyperparameter; The confidence interval for large motion
         self.fit_error_threshold = 5.0  # Hyperparameter; The fit threshold for shape errors
 
         # If no FPS is provided, set it to NaN to inform downstream checks that it isn't a valid FPS
@@ -172,8 +173,8 @@ class RespiratoryMonitor:
         self.t = deque()
         self.freq = deque()
         self.confidence = deque()
-        self.fit_error = deque()
-        self.fit_error_mean = deque()
+        self.num_peaks = deque()
+        self.num_peaks_mean = deque()
         self.fitted_data = []
         self.fitted_t = []
 
@@ -183,13 +184,13 @@ class RespiratoryMonitor:
         self.current_frame = None
         self.cropped_image = None
 
-        self.buffers = [self.data, self.confidence, self.t, self.freq, self.fit_error, self.fit_error_mean]
+        self.buffers = [self.data, self.confidence, self.t, self.freq, self.num_peaks, self.num_peaks_mean]
 
         if visualize == 'pyqtgraph':
             self.ui = self.initialize_pyqtgraph_visualization()
 
         # State Machine State
-        self.state = 'calibration'
+        self.state = 'initialize'
 
         '''Hack to avoid calibration for testing'''
         '''self.skip_calibration(538, 243, 70, 51)'''
@@ -305,10 +306,10 @@ class RespiratoryMonitor:
                     self.ui["raw_signal"].setData(self.t, self.data)
                 if len(self.fitted_data) >= 2 and len(self.fitted_t) >= 2:
                     self.ui["fitted_plot"].setData(self.fitted_t, self.fitted_data)
-                fit_error_t = np.array(self.t)[-len(self.fit_error):]
-                if self.show_error_signal and len(self.fit_error) >= 2 and len(fit_error_t) >= 2:
+                fit_error_t = np.array(self.t)[-len(self.num_peaks):]
+                if self.show_error_signal and len(self.num_peaks) >= 2 and len(fit_error_t) >= 2:
                     self.ui["error_plot"].setData(fit_error_t, np.abs(
-                        np.array(self.fit_error_mean) / self.fit_error_threshold))
+                        np.array(self.num_peaks_mean) / self.fit_error_threshold))
                 self.ui["capture_image"].setImage(self.cropped_image)
                 if len(self.freq) >= 2 and len(self.t) >= 2:
                     self.ui["frequency_plot"].setData(np.array(self.t)[-len(self.freq):], self.freq)
@@ -337,6 +338,7 @@ class RespiratoryMonitor:
             if self.state == 'initialize':
                 self.calibration_start_time = time.time()
                 self.calibration_buffer_idx = 0
+                self.state = 'calibration'
             # Calibration phase
             elif self.state == 'calibration':
                 # The beginning of the calibration phase is just acquiring enough images to calibrate
@@ -394,10 +396,8 @@ class RespiratoryMonitor:
                     # Generate confidence intervals
                     self.confidence.append(get_confidence_intervals(self.data, self.data[-1], self.confidence_interval))
                     # Peak detection
-                    thresh = self.max_peak_detection_threshold_proportion * (max(self.data) - min(self.data))
-                    mph = np.mean(np.array(self.data)) - np.std(np.array(self.data))
-                    self.peak_indices = detect_peaks(self.data, mph=mph, threshold=thresh,
-                                                     mpd=self.min_peak_index_distance)  # , show=False)
+                    self.peak_indices, fits = find_peaks_simplified(self.data, self.t, fs=self.fps)
+
                     self.peak_times = np.take(self.t, self.peak_indices)
                     diffs = [a - b for b, a in zip(self.peak_indices, self.peak_indices[1:])]
                     if len(diffs) == 0:
@@ -408,23 +408,11 @@ class RespiratoryMonitor:
 
                     self.freq.append(est_freq)
                     if len(self.peak_indices) > 0:
-                        start_idx = np.clip(self.peak_indices[-1] - int(self.measure_initialization_length / 2.), 0,
-                                            len(self.data))
-                        end_idx = np.clip(self.peak_indices[-1] + int(self.measure_initialization_length / 2.), 0,
-                                          len(self.data))
-                        self.fitted_t = np.array(self.t)[start_idx:end_idx]
-                        data_segment = np.array(self.data)[start_idx:end_idx]
-                        est_std, est_phase, est_mean, est_freq, cost = fit_sine(data_segment, self.fitted_t)
-                        self.fitted_data = est_std * np.sin(self.fitted_t * est_freq + est_phase) + est_mean
-
-                        ssr = np.sum(np.power(np.subtract(data_segment, self.fitted_data), 2.0))
-                        sst = np.sum(np.power(np.subtract(data_segment, np.mean(data_segment)), 2))
-                        r2 = 1 - (ssr / sst)
-                        self.fit_error.append(r2)
-                        self.fit_error_mean.append(np.mean(np.array(self.fit_error)))
+                        self.num_peaks.append(len(self.peak_indices))
+                        self.num_peaks_mean.append(np.std(np.array(self.num_peaks)))
 
                     if self.enable_error_detection and len(self.data) > 0 and len(self.confidence) > 0 and \
-                            len(self.fit_error_mean) > 0 and self.detect_errors():
+                            len(self.num_peaks_mean) > 0 and self.detect_errors():
                         self.state = 'error'
                         self.reset_start_time = time.time()
             elif self.state == 'error':
@@ -448,8 +436,8 @@ class RespiratoryMonitor:
         self.confidence.clear()
         self.freq.clear()
         self.t.clear()
-        self.fit_error.clear()
-        self.fit_error_mean.clear()
+        self.num_peaks.clear()
+        self.num_peaks_mean.clear()
         for key in self.ui:
             if callable(getattr(self.ui[key], "clear", None)):
                 self.ui[key].clear()
@@ -468,7 +456,7 @@ class RespiratoryMonitor:
             if self.data[-1] < low or self.data[-1] > high:
                 return True
 
-        if np.abs(self.fit_error[-1]) > self.fit_error_threshold:
+        if np.abs(self.num_peaks[-1]) > self.fit_error_threshold:
             return True
 
         return False

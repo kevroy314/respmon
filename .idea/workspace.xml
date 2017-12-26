@@ -2,17 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0f129319-1236-419f-bdfb-991e13ac8f32" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/kevin.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/kevin.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/base.py" afterPath="$PROJECT_DIR$/base.py" />
-      <change beforePath="$PROJECT_DIR$/lif.py" afterPath="$PROJECT_DIR$/prototypes/lif.py" />
-      <change beforePath="$PROJECT_DIR$/locating.py" afterPath="$PROJECT_DIR$/prototypes/locating.py" />
       <change beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change beforePath="$PROJECT_DIR$/multiaxis.py" afterPath="$PROJECT_DIR$/prototypes/multiaxis.py" />
-      <change beforePath="$PROJECT_DIR$/parabolic.py" afterPath="$PROJECT_DIR$/prototypes/parabolic.py" />
-      <change beforePath="$PROJECT_DIR$/temporal_analysis.py" afterPath="$PROJECT_DIR$/prototypes/temporal_analysis.py" />
-      <change beforePath="$PROJECT_DIR$/transforms.py" afterPath="$PROJECT_DIR$/transforms.py" />
-      <change beforePath="$PROJECT_DIR$/wavelets.py" afterPath="$PROJECT_DIR$/prototypes/wavelets.py" />
+      <change beforePath="$PROJECT_DIR$/prototypes/lif.py" afterPath="$PROJECT_DIR$/prototypes/lif.py" />
+      <change beforePath="$PROJECT_DIR$/prototypes/signal_measurement.py" afterPath="$PROJECT_DIR$/prototypes/signal_measurement.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,29 +16,95 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="264">
+              <caret line="9" column="6" lean-forward="false" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="base.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/base.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-7740">
-              <caret line="19" column="106" lean-forward="false" selection-start-line="19" selection-start-column="106" selection-end-line="19" selection-end-column="106" />
+            <state relative-caret-position="561">
+              <caret line="411" column="57" lean-forward="false" selection-start-line="411" selection-start-column="57" selection-end-line="411" selection-end-column="57" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
-                <element signature="e#762#3160#0" expanded="false" />
-                <element signature="e#3218#3604#0" expanded="false" />
-                <element signature="e#3665#4154#0" expanded="false" />
-                <element signature="e#4210#4409#0" expanded="false" />
-                <element signature="e#9596#9694#0" expanded="false" />
-                <element signature="e#9754#12021#0" expanded="false" />
-                <element signature="e#12057#12276#0" expanded="false" />
-                <element signature="e#12325#12364#0" expanded="false" />
-                <element signature="e#12404#12442#0" expanded="false" />
-                <element signature="e#12516#12603#0" expanded="false" />
-                <element signature="e#12638#15248#0" expanded="false" />
-                <element signature="e#22105#22432#0" expanded="false" />
-                <element signature="e#22469#22687#0" expanded="false" />
-                <element signature="e#22726#23032#0" expanded="false" />
-                <element signature="e#23369#25659#0" expanded="false" />
+                <element signature="e#826#3224#0" expanded="false" />
+                <element signature="e#3282#3668#0" expanded="false" />
+                <element signature="e#3729#4218#0" expanded="false" />
+                <element signature="e#4274#4473#0" expanded="false" />
+                <element signature="e#9659#9757#0" expanded="false" />
+                <element signature="e#9817#12084#0" expanded="false" />
+                <element signature="e#12120#12339#0" expanded="false" />
+                <element signature="e#12388#12427#0" expanded="false" />
+                <element signature="e#12467#12505#0" expanded="false" />
+                <element signature="e#12579#12666#0" expanded="false" />
+                <element signature="e#12701#15311#0" expanded="false" />
+                <element signature="e#20976#21303#0" expanded="false" />
+                <element signature="e#21340#21558#0" expanded="false" />
+                <element signature="e#21597#21903#0" expanded="false" />
+                <element signature="e#22240#24530#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="lif.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/prototypes/lif.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="396">
+              <caret line="38" column="45" lean-forward="true" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="signal_measurement.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/prototypes/signal_measurement.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="807">
+              <caret line="108" column="4" lean-forward="false" selection-start-line="108" selection-start-column="4" selection-end-line="108" selection-end-column="4" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="filter.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/prototypes/filter.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="627">
+              <caret line="19" column="9" lean-forward="false" selection-start-line="19" selection-start-column="9" selection-end-line="19" selection-end-column="9" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="peak.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../peakutils/peak.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="639">
+              <caret line="167" column="0" lean-forward="true" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="minpack.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../scipy/optimize/minpack.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="766">
+              <caret line="745" column="0" lean-forward="false" selection-start-line="745" selection-start-column="0" selection-end-line="745" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -61,13 +120,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>amplification</find>
-      <find>create_laplacian_image_pyramid</find>
-      <find>verbose</find>
-      <find>logging</find>
-      <find>fit_sine</find>
-      <find>limit_fps</find>
-      <find>noinsection</find>
       <find>curves</find>
       <find>buffer</find>
       <find>setData</find>
@@ -91,6 +143,13 @@
       <find>hyperpar</find>
       <find>pyqtgraph</find>
       <find>print</find>
+      <find>fig_size</find>
+      <find>sse</find>
+      <find>gaussian</find>
+      <find>sst</find>
+      <find>scatter</find>
+      <find>calibration_buffer_target_length</find>
+      <find>calibration_start_time</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -113,10 +172,13 @@
         <option value="$PROJECT_DIR$/detect_peaks.py" />
         <option value="$PROJECT_DIR$/signal_measurement.py" />
         <option value="$PROJECT_DIR$/transforms.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/__init__.py" />
         <option value="$PROJECT_DIR$/prototypes/multiaxis.py" />
         <option value="$PROJECT_DIR$/prototypes/detect_peaks.py" />
+        <option value="$PROJECT_DIR$/prototypes/lif.py" />
+        <option value="$PROJECT_DIR$/prototypes/filter.py" />
+        <option value="$PROJECT_DIR$/prototypes/signal_measurement.py" />
+        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/base.py" />
       </list>
     </option>
@@ -203,6 +265,42 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="filter" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\kevin\AppData\Local\conda\conda\envs\parvo\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/prototypes" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="false" />
+      <option name="ADD_SOURCE_ROOTS" value="false" />
+      <module name="eulerian_magnification" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/prototypes/filter.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="lif" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\kevin\AppData\Local\conda\conda\envs\parvo\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/prototypes" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="false" />
+      <option name="ADD_SOURCE_ROOTS" value="false" />
+      <module name="eulerian_magnification" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/prototypes/lif.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -221,19 +319,19 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="multiaxis" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="signal_measurement (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="C:\Users\kevin\AppData\Local\conda\conda\envs\parvo\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/prototypes" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="false" />
       <option name="ADD_SOURCE_ROOTS" value="false" />
       <module name="eulerian_magnification" />
-      <option name="SCRIPT_NAME" value="C:\Users\kevin\AppData\Local\conda\conda\envs\parvo\Lib\site-packages\eulerian_magnification\prototypes\multiaxis.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/prototypes/signal_measurement.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -257,56 +355,20 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="tmp" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="false" />
-      <option name="ADD_SOURCE_ROOTS" value="false" />
-      <module name="eulerian_magnification" />
-      <option name="SCRIPT_NAME" value="C:\Users\kevin\AppData\Local\conda\conda\envs\parvo\Lib\site-packages\eulerian_magnification\prototypes\wavelets.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
-    <configuration name="wavelets" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="C:\Users\kevin\AppData\Local\conda\conda\envs\parvo\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="false" />
-      <option name="ADD_SOURCE_ROOTS" value="false" />
-      <module name="eulerian_magnification" />
-      <option name="SCRIPT_NAME" value="C:\Users\kevin\AppData\Local\conda\conda\envs\parvo\Lib\site-packages\eulerian_magnification\prototypes\wavelets.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.main" />
-      <item index="1" class="java.lang.String" itemvalue="Python.tmp" />
-      <item index="2" class="java.lang.String" itemvalue="Python.wavelets" />
-      <item index="3" class="java.lang.String" itemvalue="Python.multiaxis" />
-      <item index="4" class="java.lang.String" itemvalue="Python.signal_measurement" />
+      <item index="1" class="java.lang.String" itemvalue="Python.signal_measurement" />
+      <item index="2" class="java.lang.String" itemvalue="Python.lif" />
+      <item index="3" class="java.lang.String" itemvalue="Python.filter" />
+      <item index="4" class="java.lang.String" itemvalue="Python.signal_measurement (1)" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.main" />
-        <item index="1" class="java.lang.String" itemvalue="Python.signal_measurement" />
-        <item index="2" class="java.lang.String" itemvalue="Python.multiaxis" />
-        <item index="3" class="java.lang.String" itemvalue="Python.wavelets" />
-        <item index="4" class="java.lang.String" itemvalue="Python.tmp" />
+        <item index="1" class="java.lang.String" itemvalue="Python.signal_measurement (1)" />
+        <item index="2" class="java.lang.String" itemvalue="Python.filter" />
+        <item index="3" class="java.lang.String" itemvalue="Python.signal_measurement" />
+        <item index="4" class="java.lang.String" itemvalue="Python.lif" />
       </list>
     </recent_temporary>
   </component>
@@ -372,23 +434,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/transforms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="17" column="16" lean-forward="false" selection-start-line="17" selection-start-column="16" selection-end-line="17" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/butter_example.py" />
     <entry file="file://$PROJECT_DIR$/transforms.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -403,7 +448,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#14#0" expanded="true" />
+            <element signature="e#0#14#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -420,7 +465,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#14#0" expanded="true" />
+            <element signature="e#0#14#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -437,7 +482,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#14#0" expanded="true" />
+            <element signature="e#0#14#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -447,7 +492,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#14#0" expanded="true" />
+            <element signature="e#0#14#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -460,13 +505,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tracking.py" />
-    <entry file="file://$PROJECT_DIR$/../scipy/optimize/minpack.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="370">
-          <caret line="379" column="0" lean-forward="false" selection-start-line="379" selection-start-column="0" selection-end-line="379" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../numpy/core/_methods.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="370">
@@ -522,16 +560,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="9" column="12" lean-forward="false" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pyramid.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-815">
@@ -580,14 +608,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/prototypes/signal_measurement.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="8" column="0" lean-forward="true" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/prototypes/multiaxis.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="759">
@@ -604,45 +624,91 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/prototypes/lif.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1290">
-          <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/prototypes/detect_peaks.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5775">
           <caret line="175" column="0" lean-forward="false" selection-start-line="175" selection-start-column="0" selection-end-line="175" selection-end-column="0" />
           <folding>
-            <element signature="e#112#159#0" expanded="true" />
+            <element signature="e#112#159#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../scipy/optimize/minpack.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="766">
+          <caret line="745" column="0" lean-forward="false" selection-start-line="745" selection-start-column="0" selection-end-line="745" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../peakutils/peak.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="639">
+          <caret line="167" column="0" lean-forward="true" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/prototypes/lif.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="38" column="45" lean-forward="true" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/prototypes/filter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="627">
+          <caret line="19" column="9" lean-forward="false" selection-start-line="19" selection-start-column="9" selection-end-line="19" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/prototypes/signal_measurement.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="807">
+          <caret line="108" column="4" lean-forward="false" selection-start-line="108" selection-start-column="4" selection-end-line="108" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="9" column="6" lean-forward="false" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7740">
-          <caret line="19" column="106" lean-forward="false" selection-start-line="19" selection-start-column="106" selection-end-line="19" selection-end-column="106" />
+        <state relative-caret-position="561">
+          <caret line="411" column="57" lean-forward="false" selection-start-line="411" selection-start-column="57" selection-end-line="411" selection-end-column="57" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#762#3160#0" expanded="false" />
-            <element signature="e#3218#3604#0" expanded="false" />
-            <element signature="e#3665#4154#0" expanded="false" />
-            <element signature="e#4210#4409#0" expanded="false" />
-            <element signature="e#9596#9694#0" expanded="false" />
-            <element signature="e#9754#12021#0" expanded="false" />
-            <element signature="e#12057#12276#0" expanded="false" />
-            <element signature="e#12325#12364#0" expanded="false" />
-            <element signature="e#12404#12442#0" expanded="false" />
-            <element signature="e#12516#12603#0" expanded="false" />
-            <element signature="e#12638#15248#0" expanded="false" />
-            <element signature="e#22105#22432#0" expanded="false" />
-            <element signature="e#22469#22687#0" expanded="false" />
-            <element signature="e#22726#23032#0" expanded="false" />
-            <element signature="e#23369#25659#0" expanded="false" />
+            <element signature="e#826#3224#0" expanded="false" />
+            <element signature="e#3282#3668#0" expanded="false" />
+            <element signature="e#3729#4218#0" expanded="false" />
+            <element signature="e#4274#4473#0" expanded="false" />
+            <element signature="e#9659#9757#0" expanded="false" />
+            <element signature="e#9817#12084#0" expanded="false" />
+            <element signature="e#12120#12339#0" expanded="false" />
+            <element signature="e#12388#12427#0" expanded="false" />
+            <element signature="e#12467#12505#0" expanded="false" />
+            <element signature="e#12579#12666#0" expanded="false" />
+            <element signature="e#12701#15311#0" expanded="false" />
+            <element signature="e#20976#21303#0" expanded="false" />
+            <element signature="e#21340#21558#0" expanded="false" />
+            <element signature="e#21597#21903#0" expanded="false" />
+            <element signature="e#22240#24530#0" expanded="false" />
           </folding>
         </state>
       </provider>
