@@ -5,7 +5,7 @@ import numpy as np
 from collections import deque
 import matplotlib.pyplot as plt
 import scipy.signal as signal
-from parabolic import parabolic
+from prototypes.parabolic import parabolic
 
 
 # Set up logging

@@ -2,6 +2,7 @@
   <dictionary name="kevin">
     <words>
       <w>asctime</w>
+      <w>eulerian</w>
       <w>hyperparameter</w>
       <w>pyqtgraph</w>
     </words>
