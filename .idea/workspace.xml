@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0f129319-1236-419f-bdfb-991e13ac8f32" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/base.py" afterPath="$PROJECT_DIR$/base.py" />
+      <change beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
       <change beforePath="$PROJECT_DIR$/prototypes/flow.py" afterPath="$PROJECT_DIR$/prototypes/flow.py" />
+      <change beforePath="$PROJECT_DIR$/prototypes/signal_measurement.py" afterPath="$PROJECT_DIR$/prototypes/signal_measurement.py" />
+      <change beforePath="$PROJECT_DIR$/transforms.py" afterPath="$PROJECT_DIR$/transforms.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,8 +20,8 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="297">
-              <caret line="10" column="6" lean-forward="false" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
+            <state relative-caret-position="264">
+              <caret line="9" column="4" lean-forward="false" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -26,11 +30,9 @@
       <file leaf-file-name="flow.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/prototypes/flow.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-858">
-              <caret line="58" column="43" lean-forward="false" selection-start-line="58" selection-start-column="43" selection-end-line="58" selection-end-column="43" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="500">
+              <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="39" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -38,21 +40,19 @@
       <file leaf-file-name="base.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/base.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="665">
-              <caret line="298" column="8" lean-forward="false" selection-start-line="298" selection-start-column="8" selection-end-line="298" selection-end-column="52" />
+            <state relative-caret-position="490">
+              <caret line="208" column="31" lean-forward="false" selection-start-line="208" selection-start-column="31" selection-end-line="208" selection-end-column="31" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
-                <element signature="e#777#3071#0" expanded="false" />
-                <element signature="e#3129#3515#0" expanded="false" />
-                <element signature="e#3576#4065#0" expanded="false" />
-                <element signature="e#4121#4320#0" expanded="false" />
-                <element signature="e#11605#11703#0" expanded="false" />
-                <element signature="e#14334#14373#0" expanded="false" />
-                <element signature="e#14413#14451#0" expanded="false" />
-                <element signature="e#14525#14612#0" expanded="false" />
-                <element signature="e#24299#24626#0" expanded="false" />
-                <element signature="e#24663#24881#0" expanded="false" />
-                <element signature="e#24920#25237#0" expanded="false" />
+                <element signature="e#8176#8358#0" expanded="false" />
+                <element signature="e#10724#10943#0" expanded="false" />
+                <element signature="e#10992#11031#0" expanded="false" />
+                <element signature="e#11071#11109#0" expanded="false" />
+                <element signature="e#14377#14458#0" expanded="false" />
+                <element signature="e#14494#14906#0" expanded="false" />
+                <element signature="e#14942#15975#0" expanded="false" />
+                <element signature="e#24257#24584#0" expanded="false" />
+                <element signature="e#24621#24839#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -69,36 +69,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>fig_size</find>
-      <find>sse</find>
-      <find>gaussian</find>
-      <find>sst</find>
-      <find>scatter</find>
-      <find>calibration_buffer_target_length</find>
-      <find>calibration_start_time</find>
-      <find>freq_min</find>
-      <find>temporal_filter_function</find>
-      <find>temporal_bandpass_filter_fft</find>
-      <find>measure_initialization_length</find>
-      <find>min_peak_index_distance</find>
-      <find>min_peak_index_frequency</find>
-      <find>max_peak_detection_threshold_proportion</find>
-      <find>fit_error_threshold</find>
-      <find>save_calibration_image</find>
-      <find>threshold</find>
-      <find>eulerian_magnification_bandpass</find>
-      <find>find_peaks_simplified</find>
-      <find>self.threshold</find>
-      <find>save</find>
-      <find>VideoWr</find>
-      <find>filter</find>
-      <find>find_p</find>
       <find>find_peaks</find>
       <find>find</find>
       <find>sort</find>
       <find>sortk</find>
       <find>VideoCap</find>
       <find>next_frame</find>
+      <find>nan</find>
+      <find>lowpass</find>
+      <find>filter</find>
+      <find>len</find>
+      <find>peak</find>
+      <find>find_peaks_simplified</find>
+      <find>image</find>
+      <find>self.current_frame</find>
+      <find>mask</find>
+      <find>self.data</find>
+      <find>self.filtered_data</find>
+      <find>get_confidence_intervals</find>
+      <find>peak_minimum_sample_distance</find>
+      <find>BPM</find>
+      <find>self.freq</find>
+      <find>error_reset_delay</find>
+      <find>show_error_signal</find>
+      <find>fitted_data</find>
+      <find>fitted_t</find>
+      <find>error</find>
+      <find>fit_sine</find>
+      <find>print</find>
+      <find>aver</find>
+      <find>range</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -120,16 +120,17 @@
         <option value="$PROJECT_DIR$/multiaxis.py" />
         <option value="$PROJECT_DIR$/detect_peaks.py" />
         <option value="$PROJECT_DIR$/signal_measurement.py" />
-        <option value="$PROJECT_DIR$/transforms.py" />
         <option value="$PROJECT_DIR$/__init__.py" />
         <option value="$PROJECT_DIR$/prototypes/multiaxis.py" />
         <option value="$PROJECT_DIR$/prototypes/detect_peaks.py" />
         <option value="$PROJECT_DIR$/prototypes/lif.py" />
         <option value="$PROJECT_DIR$/prototypes/filter.py" />
+        <option value="$PROJECT_DIR$/tools.py" />
         <option value="$PROJECT_DIR$/prototypes/signal_measurement.py" />
-        <option value="$PROJECT_DIR$/base.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/prototypes/flow.py" />
+        <option value="$PROJECT_DIR$/transforms.py" />
+        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/base.py" />
       </list>
     </option>
   </component>
@@ -197,7 +198,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.flow">
+  <component name="RunManager" selected="Python.main">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -315,8 +316,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.flow" />
-        <item index="1" class="java.lang.String" itemvalue="Python.main" />
+        <item index="0" class="java.lang.String" itemvalue="Python.main" />
+        <item index="1" class="java.lang.String" itemvalue="Python.flow" />
         <item index="2" class="java.lang.String" itemvalue="Python.signal_measurement (1)" />
         <item index="3" class="java.lang.String" itemvalue="Python.filter" />
         <item index="4" class="java.lang.String" itemvalue="Python.signal_measurement" />
@@ -378,8 +379,12 @@
           <line>40</line>
           <option name="timeStamp" value="58" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/prototypes/signal_measurement.py</url>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="66" />
+      <option name="time" value="68" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -388,14 +393,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/transforms.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
@@ -435,7 +432,6 @@
     <entry file="file://$PROJECT_DIR$/calibration13.png" />
     <entry file="file://$PROJECT_DIR$/calibration12.png" />
     <entry file="file://$PROJECT_DIR$/calibration11.png" />
-    <entry file="file://$PROJECT_DIR$/calibration10.png" />
     <entry file="file://$PROJECT_DIR$/calibration9.png" />
     <entry file="file://$PROJECT_DIR$/calibration8.png" />
     <entry file="file://$PROJECT_DIR$/calibration7.png" />
@@ -514,20 +510,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../scipy/optimize/minpack.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24090">
-          <caret line="745" column="0" lean-forward="false" selection-start-line="745" selection-start-column="0" selection-end-line="745" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../peakutils/peak.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5379">
-          <caret line="167" column="0" lean-forward="false" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/prototypes/lif.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1155">
@@ -549,6 +531,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="594">
           <caret line="25" column="5" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -563,23 +546,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="370">
           <caret line="706" column="0" lean-forward="false" selection-start-line="706" selection-start-column="0" selection-end-line="706" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/transforms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4191">
-          <caret line="134" column="10" lean-forward="false" selection-start-line="134" selection-start-column="10" selection-end-line="134" selection-end-column="10" />
-          <folding>
-            <element signature="e#0#11#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/prototypes/signal_measurement.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="50" />
           <folding />
         </state>
       </provider>
@@ -608,14 +574,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="10" column="6" lean-forward="false" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../numpy/linalg/linalg.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="278">
@@ -624,33 +582,82 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../peakutils/peak.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="355">
+          <caret line="64" column="0" lean-forward="false" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/prototypes/signal_measurement.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="99">
+          <caret line="3" column="33" lean-forward="false" selection-start-line="3" selection-start-column="33" selection-end-line="3" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/transforms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="363">
+          <caret line="11" column="52" lean-forward="false" selection-start-line="11" selection-start-column="52" selection-end-line="11" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../scipy/optimize/minpack.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1063">
+          <caret line="784" column="0" lean-forward="false" selection-start-line="784" selection-start-column="0" selection-end-line="784" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="9" column="4" lean-forward="false" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/calibration10.png">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/prototypes/flow.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-858">
-          <caret line="58" column="43" lean-forward="false" selection-start-line="58" selection-start-column="43" selection-end-line="58" selection-end-column="43" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="500">
+          <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="39" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="665">
-          <caret line="298" column="8" lean-forward="false" selection-start-line="298" selection-start-column="8" selection-end-line="298" selection-end-column="52" />
+        <state relative-caret-position="490">
+          <caret line="208" column="31" lean-forward="false" selection-start-line="208" selection-start-column="31" selection-end-line="208" selection-end-column="31" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#777#3071#0" expanded="false" />
-            <element signature="e#3129#3515#0" expanded="false" />
-            <element signature="e#3576#4065#0" expanded="false" />
-            <element signature="e#4121#4320#0" expanded="false" />
-            <element signature="e#11605#11703#0" expanded="false" />
-            <element signature="e#14334#14373#0" expanded="false" />
-            <element signature="e#14413#14451#0" expanded="false" />
-            <element signature="e#14525#14612#0" expanded="false" />
-            <element signature="e#24299#24626#0" expanded="false" />
-            <element signature="e#24663#24881#0" expanded="false" />
-            <element signature="e#24920#25237#0" expanded="false" />
+            <element signature="e#8176#8358#0" expanded="false" />
+            <element signature="e#10724#10943#0" expanded="false" />
+            <element signature="e#10992#11031#0" expanded="false" />
+            <element signature="e#11071#11109#0" expanded="false" />
+            <element signature="e#14377#14458#0" expanded="false" />
+            <element signature="e#14494#14906#0" expanded="false" />
+            <element signature="e#14942#15975#0" expanded="false" />
+            <element signature="e#24257#24584#0" expanded="false" />
+            <element signature="e#24621#24839#0" expanded="false" />
           </folding>
         </state>
       </provider>

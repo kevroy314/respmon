@@ -1,3 +1,5 @@
+import time
+import copy
 import pywt
 import scipy
 from prototypes import parabolic
@@ -6,6 +8,8 @@ import scipy.fftpack
 import scipy.signal as signal
 import matplotlib.pyplot as plt
 from prototypes.wavelets import plot_signal_decomp
+from scipy.signal import butter, filtfilt
+from pyramid import create_laplacian_video_pyramid, collapse_laplacian_video_pyramid
 
 
 def nomrmalize(data):
@@ -48,6 +52,20 @@ def butter_bandpass_filter(_data, _lowcut, _highcut, _fs, order=5):
 def butter_bandpass_filter_fast(_data, _b, _a, axis=0):
     _y = scipy.signal.lfilter(_b, _a, _data, axis=axis)
     return _y
+
+
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    # noinspection PyTupleAssignmentBalance
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return b, a
+
+
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order)
+    y = filtfilt(b, a, data)
+    return y
 
 
 def temporal_bandpass_filter(data, fps, freq_min=0.833, freq_max=1, axis=0,
@@ -161,3 +179,51 @@ def wavelet_filter(data, w='db4', iterations=5):
         coeff_list = [coeff, None] + [None] * i
         rec_a.append(pywt.waverec(coeff_list, w))
     return rec_a[-1]
+
+
+def eulerian_magnification_bandpass(vid_data, fps, freq_min, freq_max, amplification,
+                                    pyramid_levels=4, skip_levels_at_top=2, verbose=False,
+                                    temporal_filter_function=temporal_bandpass_filter_fft, threshold=0.7):
+    t0 = time.time()
+    vid_pyramid = create_laplacian_video_pyramid(vid_data, pyramid_levels=pyramid_levels)
+    t1 = time.time()
+    bandpassed_pyramid = []
+    for i0 in range(0, len(vid_pyramid)):
+        bandpassed_pyramid.append(np.zeros(vid_pyramid[i0].shape))
+    if verbose:
+        print("{2} (t={0}, dt={1})".format(t0, t1-t0, "create_laplacian_video_pyramid"))
+        print("{2} (t={0}, dt={1})".format('n/a', (t1-t0)/float(len(vid_data)), "Frame Average"))
+    for i, vid in enumerate(vid_pyramid):
+        if i < skip_levels_at_top or i >= len(vid_pyramid) - 1:
+            # ignore the top and bottom of the pyramid. One end has too much noise and the other end is the
+            # gaussian representation
+            continue
+        t0 = time.time()
+        bandpassed = temporal_filter_function(vid, fps, freq_min=freq_min, freq_max=freq_max,
+                                              amplification_factor=amplification,
+                                              debug='{0},{1}:'.format('n/a', i), verbose=verbose)
+        t1 = time.time()
+        if verbose:
+            print("{2} (t={0}, dt={1})".format(t0, t1-t0, "temporal_bandpass_filter"))
+            print("{2} (t={0}, dt={1})".format('n/a', (t1-t0)/float(len(vid_data)), "Frame Average"))
+        bandpassed_pyramid[i] += bandpassed
+        vid_pyramid[i] += bandpassed
+    t0 = time.time()
+    # vid_data = collapse_laplacian_video_pyramid(vid_pyramid)
+    raw_bandpassed_data = collapse_laplacian_video_pyramid(bandpassed_pyramid)
+
+    window_proportional_width = threshold
+    min_val = raw_bandpassed_data.min()
+    replace_value = min_val
+    max_val = raw_bandpassed_data.max()
+    intensity_filter_width = (max_val - min_val) * window_proportional_width
+    top = max_val - intensity_filter_width
+    mask = raw_bandpassed_data >= top
+    bandpassed_data = copy.deepcopy(raw_bandpassed_data)
+    bandpassed_data[mask] = replace_value
+    t1 = time.time()
+    if verbose:
+        # print('min={0}, max={1}'.format(np.array(vid_data).min(), np.array(vid_data).max()))
+        print("{2} (t={0}, dt={1})".format(t0, t1-t0, "collapse_laplacian_video_pyramid"))
+        print("{2} (t={0}, dt={1})".format('n/a', (t1-t0)/float(len(vid_data)), "Frame Average"))
+    return bandpassed_data, raw_bandpassed_data

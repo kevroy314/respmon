@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import peakutils
-from scipy.signal import butter, lfilter, filtfilt
+from scipy.signal import butter, filtfilt
 
 measure_buffer_length = 128  # Hyperparameter (from main.py)
 
@@ -70,10 +70,8 @@ def find_peaks(filename, ax, fs):
         ax.annotate(str(txt), (peak_ts[i], peak_ds[i]))
 
 
-def find_peaks_simplified(data, t, width=5, filter_order=3, fs=5.0, cutoff=1.0, gaussian_cutoff=10.0):
-    data_filtered = butter_lowpass_filter(data, cutoff, fs, filter_order)
-
-    indices = peakutils.indexes(data_filtered, min_dist=width)
+def find_peaks_simplified(data, t, width=5, gaussian_cutoff=10.0):
+    indices = peakutils.indexes(data, min_dist=width)
 
     final_idxs = []
     fits = []
@@ -84,7 +82,7 @@ def find_peaks_simplified(data, t, width=5, filter_order=3, fs=5.0, cutoff=1.0, 
         if idx + w > len(t):
             w = len(t) - idx
         ti = np.array(t)[idx - w:idx + w]
-        datai = np.array(data_filtered)[idx - w:idx + w]
+        datai = np.array(data)[idx - w:idx + w]
         try:
             params = peakutils.gaussian_fit(ti, datai, center_only=False)
             y = [peakutils.gaussian(x, *params) for x in ti]

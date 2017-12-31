@@ -130,7 +130,7 @@ while cap.isOpened():
         evec1, evec2 = eig_vecs[:, sort_indices]
         x_v1, y_v1 = evec1  # Eigenvector with largest eigenvalue
         x_v2, y_v2 = evec2
-        line_vec = np.array([[0, 0], evec1]) # , [0, 0], evec2])
+        line_vec = np.array([[0, 0], evec1])
         reduced_data = np.array(motion_data).dot(evec1)
         try:
             filtered_data = butter_lowpass_filter(reduced_data, *filter_band)

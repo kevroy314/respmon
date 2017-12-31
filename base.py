@@ -3,108 +3,24 @@ import cv2
 import time
 import copy
 import logging
+import peakutils
 import numpy as np
 import pyqtgraph as pg
 from tqdm import tqdm
-import scipy.stats as stats
 from collections import deque
 from pyqtgraph.Qt import QtGui
-from prototypes.signal_measurement import find_peaks_simplified
-from scipy.optimize import least_squares
-from transforms import uint8_to_float, float_to_uint8, temporal_bandpass_filter_fft
-from pyramid import create_laplacian_video_pyramid, collapse_laplacian_video_pyramid
+from tools import reduce_bounding_box
+from transforms import uint8_to_float, float_to_uint8, eulerian_magnification_bandpass, butter_lowpass_filter
 
 
-def eulerian_magnification_bandpass(vid_data, fps, freq_min, freq_max, amplification,
-                                    pyramid_levels=4, skip_levels_at_top=2, verbose=False,
-                                    temporal_filter_function=temporal_bandpass_filter_fft, threshold=0.7):
-    t0 = time.time()
-    vid_pyramid = create_laplacian_video_pyramid(vid_data, pyramid_levels=pyramid_levels)
-    t1 = time.time()
-    bandpassed_pyramid = []
-    for i0 in range(0, len(vid_pyramid)):
-        bandpassed_pyramid.append(np.zeros(vid_pyramid[i0].shape))
-    if verbose:
-        print("{2} (t={0}, dt={1})".format(t0, t1-t0, "create_laplacian_video_pyramid"))
-        print("{2} (t={0}, dt={1})".format('n/a', (t1-t0)/float(len(vid_data)), "Frame Average"))
-    for i, vid in enumerate(vid_pyramid):
-        if i < skip_levels_at_top or i >= len(vid_pyramid) - 1:
-            # ignore the top and bottom of the pyramid. One end has too much noise and the other end is the
-            # gaussian representation
-            continue
-        t0 = time.time()
-        bandpassed = temporal_filter_function(vid, fps, freq_min=freq_min, freq_max=freq_max,
-                                              amplification_factor=amplification,
-                                              debug='{0},{1}:'.format('n/a', i), verbose=verbose)
-        t1 = time.time()
-        if verbose:
-            print("{2} (t={0}, dt={1})".format(t0, t1-t0, "temporal_bandpass_filter"))
-            print("{2} (t={0}, dt={1})".format('n/a', (t1-t0)/float(len(vid_data)), "Frame Average"))
-        bandpassed_pyramid[i] += bandpassed
-        vid_pyramid[i] += bandpassed
-    t0 = time.time()
-    # vid_data = collapse_laplacian_video_pyramid(vid_pyramid)
-    raw_bandpassed_data = collapse_laplacian_video_pyramid(bandpassed_pyramid)
-
-    window_proportional_width = threshold
-    min_val = raw_bandpassed_data.min()
-    replace_value = min_val
-    max_val = raw_bandpassed_data.max()
-    intensity_filter_width = (max_val - min_val) * window_proportional_width
-    top = max_val - intensity_filter_width
-    mask = raw_bandpassed_data >= top
-    bandpassed_data = copy.deepcopy(raw_bandpassed_data)
-    bandpassed_data[mask] = replace_value
-    t1 = time.time()
-    if verbose:
-        # print('min={0}, max={1}'.format(np.array(vid_data).min(), np.array(vid_data).max()))
-        print("{2} (t={0}, dt={1})".format(t0, t1-t0, "collapse_laplacian_video_pyramid"))
-        print("{2} (t={0}, dt={1})".format('n/a', (t1-t0)/float(len(vid_data)), "Frame Average"))
-    return bandpassed_data, raw_bandpassed_data
-
-
-def reduce_bounding_box(x, y, w, h, maximum_area):
-    start_area = w*h
-    if start_area <= maximum_area:
-        return x, y, w, h
-    shrink_proportion = np.sqrt((float(maximum_area)/float(start_area)))
-    new_w = w * shrink_proportion
-    new_h = h * shrink_proportion
-    new_x = x + ((w - new_w) / 2.)
-    new_y = y + ((h - new_h) / 2.)
-    return int(np.round(new_x)), int(np.round(new_y)), int(np.round(new_w)), int(np.round(new_h))
-
-
-def fit_sine(_data, _t, min_least_squares_length=10):
-    guess_mean = np.mean(_data)
-    guess_std = max(_data) - min(_data)
-    guess_freq = est_freq = 1
-
-    cost = np.nan
-    if len(_data) > min_least_squares_length:
-        optimize_func = lambda x: guess_std * np.cos(x[0] * np.array(_t)) + guess_mean - np.array(_data)
-        res = least_squares(optimize_func, x0=[guess_freq],
-                            bounds=([0], [np.inf]))
-        est_freq = res.x
-        cost = res.cost
-
-    return guess_std, np.pi/2.0, guess_mean, est_freq, cost
-
-
-def get_confidence_intervals(sample, value, ci):
-    std = np.mean(sample)
-    z_critical = stats.norm.ppf(q=1.0-((1.0-ci)/2.0))
-    margin_of_error = z_critical * (std / np.sqrt(len(sample)))
-    return value - margin_of_error, value + margin_of_error
-
-
-# TODO: Serious peak detection issue causes constant estimation of respiration rates within the same freq band
+# TODO: Fix error tracking (large motion is handled by point tracking, but no motion is an issue now)
+# TODO: Peak detection has double-peak issue?
 # TODO: Hyperparameter optimization for stability (pull data from web cams)
 
 class RespiratoryMonitor:
     def __init__(self, capture_target=0, save_calibration_image=False, visualize='pyqtgraph', fig_size=None,
-                 fps_limit=10, error_reset_delay=10.0, show_error_signal=False, save_all_data=True):
-        self.data = []
+                 fps_limit=10, error_reset_delay=10.0, save_all_data=True,
+                 motion_extraction_method='average'):
         assert isinstance(fps_limit, (int, float)) and fps_limit > 0, "fps_limit must be a positive int or float"
         assert isinstance(save_calibration_image, bool), "save_calibration_image must be bool"
         assert visualize == 'pyqtgraph' or visualize is None, \
@@ -113,16 +29,17 @@ class RespiratoryMonitor:
             "fig_size should be None or length 2 tuple or list"
         assert isinstance(error_reset_delay, (int, float)) and error_reset_delay >= 0, \
             "error_reset_delay must be a positive int or float"
-        assert isinstance(show_error_signal, bool), "show_error_signal should be bool"
         assert isinstance(save_all_data, bool), "save_all_data should be bool"
+        assert motion_extraction_method == "average" or motion_extraction_method == "flow", \
+            "motion_extraction_method must be 'average' or 'flow'"
 
         self.error_reset_delay = error_reset_delay
-        self.show_error_signal = show_error_signal
         self.save_all_data = save_all_data
         self.fig_size = fig_size
         self.save_calibration_image = save_calibration_image
         self.capture_target = capture_target
         self.visualize = visualize
+        self.motion_extraction_method = motion_extraction_method
 
         # Initialize Capture
         # noinspection PyArgumentList
@@ -169,9 +86,14 @@ class RespiratoryMonitor:
         self.measure_buffer_length = 128  # Hyperparameter; The buffer length for the measurement stream
         self.confidence_interval = 0.95  # Hyperparameter; The confidence interval for large motion
 
-        # The mean of the standard deviation of the number of peaks across the buffer window size. If the number of
-        # peaks varies too much across the buffer window, the signal is not stable and calibration should be run again.
-        self.peak_variation_error_threshold = stats.norm.ppf(self.confidence_interval)
+        self.feature_params = dict(maxCorners=100,  # Hyperparameter
+                                   qualityLevel=0.3,  # Hyperparameter
+                                   minDistance=7,  # Hyperparameter
+                                   blockSize=7)  # Hyperparameter
+        # Parameters for lucas kanade optical flow
+        self.lk_params = dict(winSize=(15, 15),  # Hyperparameter
+                              maxLevel=2,  # Hyperparameter
+                              criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))  # Hyperparameter(s)
 
         self.gaussian_cutoff = 10.0  # Hyperparameter; Gaussian curvature parameter; Not sure best value
         self.filter_order = 3  # Hyperparameter; The filter order for the raw data filtering
@@ -201,17 +123,21 @@ class RespiratoryMonitor:
         self.confidence = deque()
         self.num_peaks = deque()
         self.num_peaks_mean = deque()
-        self.fitted_data = []
-        self.fitted_t = []
+        self.motion_data = deque()
+        self.filtered_data = []
 
         self.peak_indices = []
         self.peak_times = []
 
         self.current_frame = None
         self.cropped_image = None
+        self.previous_cropped_image = None
+        self.display_frame = None
+        self.motion_key_points = None
         self.video_out = None
 
-        self.buffers = [self.data, self.confidence, self.t, self.freq, self.num_peaks, self.num_peaks_mean]
+        self.buffers = [self.data, self.confidence, self.t, self.freq, self.num_peaks, self.num_peaks_mean,
+                        self.motion_data]
 
         if visualize == 'pyqtgraph':
             self.ui = self.initialize_pyqtgraph_visualization()
@@ -220,7 +146,7 @@ class RespiratoryMonitor:
         self.state = 'initialize'
 
         '''Hack to avoid calibration for testing'''
-        '''self.skip_calibration(538, 243, 70, 51)'''
+        # self.skip_calibration(538, 243, 70, 51)
         ''''''''''''''''''''''''''''''''''''''''''''
 
         logging.info("Capturing {0} calibration frames.".format(self.calibration_buffer_target_length))
@@ -238,6 +164,7 @@ class RespiratoryMonitor:
         self.y = y
         self.w = w
         self.h = h
+        self.peak_minimum_sample_distance = int(np.floor(self.fps / self.freq_max))
         self.state = 'measure'
 
     def initialize_pyqtgraph_visualization(self):
@@ -267,8 +194,6 @@ class RespiratoryMonitor:
 
         fitted_plot = left_plot.plot(pen='g')
 
-        error_plot = left_plot.plot(pen='r')
-
         image_view = layout.addViewBox()
         image_view.setAspectLocked(True)
         capture_image = pg.ImageItem(title='Capture Image', border='w')
@@ -280,19 +205,20 @@ class RespiratoryMonitor:
 
         frequency_plot = right_plot.plot()
 
-        bpm_text = pg.TextItem(text='??? BPM', anchor=(-0.1, 1.2), color=(255, 255, 255, 255))
+        bpm_text = pg.TextItem(text='??? BPM', anchor=(-0.1, 1.2), color=(255, 255, 255, 255),
+                               border=(0, 0, 0, 255), fill=(0, 0, 0, 127))
         bpm_text_font = pg.QtGui.QFont()
         bpm_text_font.setBold(True)
         bpm_text_font.setPointSize(24)
         bpm_text.setFont(bpm_text_font)
-        right_plot.addItem(bpm_text)
+        image_view.addItem(bpm_text)
         bpm_text.setPos(0, 0)
 
         return {"raw_signal": raw_signal, "capture_image": capture_image, "frequency_plot": frequency_plot,
                 "peak_plot": peak_plot, "bpm_text": bpm_text, "top_confidence_interval": top_confidence_interval,
                 "bottom_confidence_interval": bottom_confidence_interval,
                 "fill_confidence_interval": fill_confidence_interval, "fitted_plot": fitted_plot,
-                "error_plot": error_plot, "window": win, "plots": [left_plot, right_plot], "application": app}
+                "window": win, "plots": [left_plot, right_plot], "application": app}
 
     def next_frame(self):
         ret, frame = self.cap.read()
@@ -312,6 +238,10 @@ class RespiratoryMonitor:
         for plot in self.ui["plots"]:
             plot.enableAutoRange(axes, autoscale_enabled)
 
+    def set_plot_x_range(self, low, high):
+        for plot in self.ui["plots"]:
+            plot.setXRange(low, high, padding=0)
+
     def update_ui(self):
         if self.visualize == 'pyqtgraph':
             if self.state == "calibration":
@@ -319,34 +249,40 @@ class RespiratoryMonitor:
                     self.set_window_title(
                         'Capturing calibration frames... {0}/{1}'.format(self.calibration_buffer_idx,
                                                                          self.calibration_buffer_target_length))
-                    self.set_image(self.current_frame)
+                    self.display_frame = self.current_frame
+                    self.set_image(self.display_frame)
                 else:
                     self.set_window_title('Measuring...')
-                    self.set_plot_autoscale(True)
             elif self.state == "measure":
+                # First iteration
+                if self.cropped_image is None:
+                    self.set_plot_autoscale(True)
+                    return
+                self.display_frame = float_to_uint8(self.cropped_image)
+                if self.motion_extraction_method == 'flow':
+                    mask = np.zeros_like(self.display_frame)
+                    for i, new in enumerate(self.motion_key_points):
+                        a, b = new.ravel()
+                        mask = cv2.circle(mask, (a, b), 2, (255, 255, 255), -1)
+                        self.display_frame = cv2.add(self.display_frame, mask)
                 self.set_window_title('Building Measurement Buffer.'+'.'.join(
-                    ['' for _ in range(0, len(self.data) % 4)]))
+                    ['' for _ in range(0, len(self.filtered_data) % 4)]))
                 if len(self.peak_times) > 0:
-                    self.ui["peak_plot"].setData(self.peak_times, np.take(self.data, self.peak_indices))
+                    self.ui["peak_plot"].setData(self.peak_times, np.take(self.filtered_data, self.peak_indices))
                 self.set_window_title(
-                    'Measuring.' + '.'.join(['' for _ in range(0, len(self.data) % 4)]))
-                if len(self.data) >= 2 and len(self.t) >= 2:
-                    self.ui["raw_signal"].setData(self.t, self.data)
-                if len(self.fitted_data) >= 2 and len(self.fitted_t) >= 2:
-                    self.ui["fitted_plot"].setData(self.fitted_t, self.fitted_data)
-                fit_error_t = np.array(self.t)[-len(self.num_peaks):]
-                if self.show_error_signal and len(self.num_peaks) >= 2 and len(fit_error_t) >= 2:
-                    self.ui["error_plot"].setData(fit_error_t, np.abs(
-                        np.array(self.num_peaks_mean) / self.peak_variation_error_threshold))
-                self.ui["capture_image"].setImage(self.cropped_image)
+                    'Measuring.' + '.'.join(['' for _ in range(0, len(self.filtered_data) % 4)]))
+                if len(self.filtered_data) >= 2 and len(self.t) >= 2:
+                    self.set_plot_x_range(min(self.t), max(self.t))
+                    self.ui["raw_signal"].setData(self.t, self.filtered_data)
+                self.ui["capture_image"].setImage(self.display_frame)
                 if len(self.freq) >= 2 and len(self.t) >= 2:
                     self.ui["frequency_plot"].setData(np.array(self.t)[-len(self.freq):], self.freq)
                     self.ui["bpm_text"].setText('{0:#.4} BPM'.format(self.freq[-1]))
-                if len(self.confidence) >= 2:
-                    ci_top, ci_bottom = np.transpose(self.confidence)
-                    ci_t = np.array(self.t)[-len(ci_top):]
-                    self.ui["top_confidence_interval"].setData(ci_t, ci_top)
-                    self.ui["bottom_confidence_interval"].setData(ci_t, ci_bottom)
+                # if len(self.confidence) >= 2:
+                #     ci_top, ci_bottom = np.transpose(self.confidence)
+                #     ci_t = np.array(self.t)[-len(ci_top):]
+                #     self.ui["top_confidence_interval"].setData(ci_t, ci_top)
+                #     self.ui["bottom_confidence_interval"].setData(ci_t, ci_bottom)
             elif self.state == "error":
                 self.set_window_title(
                     "Error: Recalibrating due to poor signal in {0}s.".format(
@@ -367,28 +303,98 @@ class RespiratoryMonitor:
             self.fps = self.fps_limit
         logging.info("Final FPS is {0}.".format(self.fps))
 
+    def find_peaks(self):
+        width = self.peak_minimum_sample_distance
+        indices = peakutils.indexes(self.filtered_data, min_dist=width)
+
+        final_idxs = []
+        fits = []
+        for idx in indices:
+            w = width
+            if idx - width < 0:
+                w = idx
+            if idx + w > len(self.t):
+                w = len(self.t) - idx
+            ti = np.array(self.t)[idx - w:idx + w]
+            datai = np.array(self.filtered_data)[idx - w:idx + w]
+            try:
+                params = peakutils.gaussian_fit(ti, datai, center_only=False)
+                y = [peakutils.gaussian(x, *params) for x in ti]
+                # ax.plot(ti, y)
+                ssr = np.sum(np.power(np.subtract(y, datai), 2.0))
+                sst = np.sum(np.power(np.subtract(y, datai), 2.0))
+                r2 = 1 - (ssr / sst)
+                fits.append(r2)
+                if params[2] < self.gaussian_cutoff:
+                    final_idxs.append(idx)
+            except RuntimeError:
+                pass
+        return final_idxs, fits
+
     def measure(self):
-        # Generate confidence intervals
-        self.confidence.append(get_confidence_intervals(self.data, self.data[-1], self.confidence_interval))
+        # Filter data
+        self.filtered_data = np.array(butter_lowpass_filter(self.data, self.freq_max*0.5, self.fps, self.filter_order))
+
         # Peak detection
-        self.peak_indices, fits = find_peaks_simplified(self.data, self.t, fs=self.fps,
-                                                        width=self.peak_minimum_sample_distance,
-                                                        filter_order=self.filter_order,
-                                                        cutoff=self.freq_max,
-                                                        gaussian_cutoff=self.gaussian_cutoff)
+        self.peak_indices, fits = self.find_peaks()
 
         self.peak_times = np.take(self.t, self.peak_indices)
-        diffs = [a - b for b, a in zip(self.peak_indices, self.peak_indices[1:])]
-        if len(diffs) == 0:
-            interval = np.nan
-        else:
+        diffs = [a - b for b, a in zip(self.peak_times, self.peak_times[1:])]
+        if len(diffs) > 0:
             interval = np.mean(diffs)
-        est_freq = 60.0 / interval  # 60 seconds in a minute
+            est_freq = 60.0 / interval  # 60 seconds in a minute
+            self.freq.append(est_freq)
 
-        self.freq.append(est_freq)
-        if len(self.peak_indices) > 0:
-            self.num_peaks.append(len(self.peak_indices))
-            self.num_peaks_mean.append(np.std(np.array(self.num_peaks)))
+    def extract_motion(self):
+        if self.motion_extraction_method == "average":
+            # Average the cropped image pixels
+            avg = np.average(self.cropped_image)
+            return avg
+
+        elif self.motion_extraction_method == "flow":
+            # On the first iteration, no motion can be detected because it requires two points, however,
+            # we can detect the key points
+            if self.previous_cropped_image is None:
+                self.previous_cropped_image = float_to_uint8(self.cropped_image.copy())
+                self.motion_key_points = cv2.goodFeaturesToTrack(self.previous_cropped_image,
+                                                                 mask=None, **self.feature_params)
+                return 0.0
+
+            p1, st, err = cv2.calcOpticalFlowPyrLK(self.previous_cropped_image, float_to_uint8(self.cropped_image),
+                                                   self.motion_key_points, None, **self.lk_params)
+            # TODO: Check for no points
+            # Select good points
+            good_new = p1[st == 1]
+            good_old = self.motion_key_points[st == 1]
+            '''Restructure Data if Feature Points Change'''
+            # Now update the previous frame and previous points
+            self.previous_cropped_image = float_to_uint8(self.cropped_image.copy())
+            self.motion_key_points = good_new.reshape(-1, 1, 2)
+
+            # Failed to find keypoints, tracking lost
+            if len(good_new) == 0 or len(good_old) == 0:
+                return np.nan
+
+            raw_motion_estimation = list(np.mean(good_old - good_new, axis=0))
+            self.motion_data.append(raw_motion_estimation)
+            '''PCA
+                1. Find the first eigenvector and transform the points along that, 
+                    getting only the primary motion component.
+                2. Transform the feature points into the first component dimension.
+                3. Lowpass filter the motion 
+            '''
+            if len(self.motion_data) >= 2:
+                x, y = np.transpose(self.motion_data)
+                coords = np.vstack([x, y])
+                cov_mat = np.cov(coords)
+                eig_vals, eig_vecs = np.linalg.eig(cov_mat)
+                sort_indices = np.argsort(eig_vals)[::-1]
+                evec1, evec2 = eig_vecs[:, sort_indices]
+                reduced_data = np.array(self.motion_data).dot(evec1)
+                motion_estimation = reduced_data[-1]
+                return motion_estimation
+            else:
+                return 0.0
 
     def run(self):
         while self.cap.isOpened():
@@ -436,22 +442,23 @@ class RespiratoryMonitor:
                     logging.info("Finished calibration.")
                     logging.info("Beginning measuring...")
                     self.calibration_progress_bar.close()
-                    if self.save_all_data:
-                        self.video_out = cv2.VideoWriter(str(self.capture_target) + '.avi',
-                                                         cv2.VideoWriter_fourcc(*'MSVC'),
-                                                         self.fps, (self.w, self.h))
+
                     self.state = 'measure'
             elif self.state == 'measure':
+                if self.save_all_data and self.video_out is None:
+                    self.video_out = cv2.VideoWriter(str(self.capture_target) + '.avi',
+                                                     cv2.VideoWriter_fourcc(*'MSVC'),
+                                                     self.fps, (self.w, self.h))
                 # Crop to the bounding box
                 self.cropped_image = self.current_frame[self.y: self.y + self.h, self.x: self.x + self.w]
                 # Check for full buffer and popleft
                 for b in self.buffers:
-                    if len(b) > self.measure_buffer_length:
+                    if len(b) >= self.measure_buffer_length:
                         b.popleft()
-                # Average the cropped image pixels
-                avg = np.average(self.cropped_image)
-                # Fill the measurement buffers
-                self.data.append(avg)
+
+                current_motion_value = self.extract_motion()
+                self.data.append(current_motion_value)
+
                 # Append to the temporal domain
                 if len(self.t) == 0:
                     self.t.append(0.)
@@ -460,13 +467,12 @@ class RespiratoryMonitor:
                 # If the raw data is to be saved, add it to the dedicated list
                 if self.save_all_data:
                     self.video_out.write(float_to_uint8(self.cropped_image))
-                    self.all_data.append((self.t[-1], avg))
+                    self.all_data.append((self.t[-1], current_motion_value))
                 if len(self.data) > self.measure_initialization_length:
                     # Perform the measurement
                     self.measure()
                     # Look for errors
-                    if self.enable_error_detection and len(self.data) > 0 and len(self.confidence) > 0 and \
-                            len(self.num_peaks_mean) > 0 and self.detect_errors():
+                    if self.enable_error_detection and self.detect_errors():
                         self.state = 'error'
                         self.reset_start_time = time.time()
             elif self.state == 'error':
@@ -480,6 +486,8 @@ class RespiratoryMonitor:
             self.sync_to_fps()
 
         logging.info("Capture closed.")
+
+        self.cap.release()
 
         if self.save_all_data:
             self.video_out.release()
@@ -506,15 +514,7 @@ class RespiratoryMonitor:
             time.sleep(sleep_time)
 
     def detect_errors(self):
-        if len(self.data) >= 1 and len(self.confidence) >= 2:
-            low, high = sorted(self.confidence[-2])
-            if self.data[-1] < low or self.data[-1] > high:
-                return True
-
-        if np.abs(self.num_peaks[-1]) > self.peak_variation_error_threshold:
-            return True
-
-        return False
+        raise NotImplementedError()
 
     @staticmethod
     def locate(calibration_video_data, fps,
