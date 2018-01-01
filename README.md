@@ -51,3 +51,5 @@ Because the signals are low frequency, it's more reliable to measure frequency v
 ### Final Signal
 
 The final output signal is one over the average interval within the measurement buffer. This result is presented in Beats Per Minute (BPM) and plotted for convenience.
+
+[![Motion Estimation](https://github.com/kevroy314/respmon/raw/master/images/measuring.gif)](https://www.youtube.com/watch?v=lylg_yagLpE)
