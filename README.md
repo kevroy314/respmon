@@ -40,7 +40,7 @@ Motion Measurement is performed in one of two ways depending on the configuratio
 
 For optical flow, a set of feature points is identified. These feature points are then tracked across frames and the difference between consecutive points becomes a raw motion signal. The first eigenvector of this raw motion signal is extracted at each time step and used to transform the 2D motion vector average into a 1D signal which can be used as a measure of the motion along the primary axis of motion. This method is more computationally expensive but produces a signal which represents the net motion in units of pixels, making it an easier signal within which to detect errors.
 
-![Calibration Steps Image](https://github.com/kevroy314/respmon/raw/master/images/motion.mp4)
+[![Motion Detection via Optical Flow](https://github.com/kevroy314/respmon/raw/master/images/motion.png)](https://www.youtube.com/watch?v=T8MH772fuOo)
 
 ### Frequency/Peak Detection
 
