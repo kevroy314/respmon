@@ -27,11 +27,12 @@ Calibration is performed by acquiring some frames and performing eulerian magnif
 
 Eulerian magnification is performed by first constructing a [Laplacian-Gaussian image pyramid](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_pyramids/py_pyramids.html) for each frame in the video, and then performing a [Fourier Transform](https://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html) along the temporal axis for each pixel at each scale. 
 
-
+![Laplacian Pyramid Image](https://github.com/kevroy314/respmon/raw/master/images/pyramid2.png)
+![Filtered Pyramid Image](https://github.com/kevroy314/respmon/raw/master/images/pyramid.png)
 
 The resulting frequency pyramid is then collapsed and averaged along the temporal axis to get a single image which acts as a "heatmap" for the locations in the image where a particular frequency is common. This image is then thresholded and the largest contour is isolated for later measurement. This largest contour's bounding box is the ROI.
 
-
+![Calibration Steps Image](https://github.com/kevroy314/respmon/raw/master/images/calibration0.png)
 
 ### Motion Measurement
 
