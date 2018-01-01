@@ -1,3 +1,4 @@
+import cv2
 import time
 import copy
 import pywt
@@ -168,6 +169,15 @@ def eulerian_magnification_bandpass(vid_data, fps, freq_min, freq_max, amplifica
         bandpassed_pyramid[i] += bandpassed
         vid_pyramid[i] += bandpassed
     t0 = time.time()
+
+    # tmp = bandpassed_pyramid
+    # img = np.hstack(tuple([float_to_uint8(cv2.copyMakeBorder(tmp[i][0],
+    #                                                          tmp[0][0].shape[0] - tmp[i][0].shape[0],
+    #                                                          0, 0, 0,
+    #                                                          # tmp[0][0].shape[1] - tmp[i][0].shape[1],
+    #                                                          cv2.BORDER_CONSTANT, value=(0, 0, 0))) for i in
+    #                        range(0, len(tmp))]))
+    # cv2.imwrite('pyramid.png', img)
     # vid_data = collapse_laplacian_video_pyramid(vid_pyramid)
     raw_bandpassed_data = collapse_laplacian_video_pyramid(bandpassed_pyramid)
 
