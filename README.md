@@ -27,17 +27,20 @@ Calibration is performed by acquiring some frames and performing eulerian magnif
 
 Eulerian magnification is performed by first constructing a [Laplacian-Gaussian image pyramid](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_pyramids/py_pyramids.html) for each frame in the video, and then performing a [Fourier Transform](https://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html) along the temporal axis for each pixel at each scale. 
 
-
+![Laplacian Pyramid Image](https://github.com/kevroy314/respmon/raw/master/images/pyramid2.png)
+![Filtered Pyramid Image](https://github.com/kevroy314/respmon/raw/master/images/pyramid.png)
 
 The resulting frequency pyramid is then collapsed and averaged along the temporal axis to get a single image which acts as a "heatmap" for the locations in the image where a particular frequency is common. This image is then thresholded and the largest contour is isolated for later measurement. This largest contour's bounding box is the ROI.
 
-
+![Calibration Steps Image](https://github.com/kevroy314/respmon/raw/master/images/calibration0.png)
 
 ### Motion Measurement
 
 Motion Measurement is performed in one of two ways depending on the configuration, either a simple average of the ROI pixel values is used or optical flow is performed. The averaging method is computationally inexpensive, but prone to errors depending on the textures/colors present in the frames. It does tend to produce a smoother signal when it works. It also has a scale which depends on the image contents, making it harder to detect errors consistently.
 
 For optical flow, a set of feature points is identified. These feature points are then tracked across frames and the difference between consecutive points becomes a raw motion signal. The first eigenvector of this raw motion signal is extracted at each time step and used to transform the 2D motion vector average into a 1D signal which can be used as a measure of the motion along the primary axis of motion. This method is more computationally expensive but produces a signal which represents the net motion in units of pixels, making it an easier signal within which to detect errors.
+
+[![Motion Detection via Optical Flow](https://github.com/kevroy314/respmon/raw/master/images/motion.png)](https://www.youtube.com/watch?v=T8MH772fuOo)
 
 ### Frequency/Peak Detection
 
