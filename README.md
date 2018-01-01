@@ -40,6 +40,8 @@ Motion Measurement is performed in one of two ways depending on the configuratio
 
 For optical flow, a set of feature points is identified. These feature points are then tracked across frames and the difference between consecutive points becomes a raw motion signal. The first eigenvector of this raw motion signal is extracted at each time step and used to transform the 2D motion vector average into a 1D signal which can be used as a measure of the motion along the primary axis of motion. This method is more computationally expensive but produces a signal which represents the net motion in units of pixels, making it an easier signal within which to detect errors.
 
+![Calibration Steps Image](https://github.com/kevroy314/respmon/raw/master/images/motion.mp4)
+
 ### Frequency/Peak Detection
 
 Because the signals are low frequency, it's more reliable to measure frequency via peak-to-peak intervals than other fourier-based methods. To reliably detect peaks, first, the signal is lowpass filtered at half of the maximum frequency used in the localizer (creating a far smoother signal). The filtered signal then passes through a peak detection algorithm whose results are filtered based on a minimum width constraint. The resulting candidate peaks are fit with a gaussian curve (which can fail, resulting in the removal of that candidate peak). The curvature parameter of the gaussian fit must be below a certain threshold for the peak to pass and be sent on as an actual, measured peak (this avoiding mini-peaks and false positives on rising edges). 
