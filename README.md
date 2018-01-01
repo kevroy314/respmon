@@ -46,6 +46,8 @@ For optical flow, a set of feature points is identified. These feature points ar
 
 Because the signals are low frequency, it's more reliable to measure frequency via peak-to-peak intervals than other fourier-based methods. To reliably detect peaks, first, the signal is lowpass filtered at half of the maximum frequency used in the localizer (creating a far smoother signal). The filtered signal then passes through a peak detection algorithm whose results are filtered based on a minimum width constraint. The resulting candidate peaks are fit with a gaussian curve (which can fail, resulting in the removal of that candidate peak). The curvature parameter of the gaussian fit must be below a certain threshold for the peak to pass and be sent on as an actual, measured peak (this avoiding mini-peaks and false positives on rising edges). 
 
+![Peak Detection](https://github.com/kevroy314/respmon/raw/master/images/peaks.png)
+
 ### Final Signal
 
 The final output signal is one over the average interval within the measurement buffer. This result is presented in Beats Per Minute (BPM) and plotted for convenience.
