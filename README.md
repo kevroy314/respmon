@@ -6,9 +6,9 @@ This repository contains Python code for real-time respiration monitoring using 
 
 It's recommended you run this in an [Anaconda](https://www.anaconda.com/download/) virtual environment. This can be configured by running:
 
-    conda create -n respmon python=3.5 matplotlib numpy scipy pyqtgraph tqdm
+    conda create -n respmon python=3.5 matplotlib numpy scipy pyqtgraph tqdm pywavelets
     activate respmon
-    pip install peakutils pywt
+    pip install peakutils
     conda install --channel https://conda.anaconda.org/menpo opencv3
     git clone https://github.com/kevroy314/respmon .
     python main.py
@@ -25,7 +25,13 @@ The core algorithm is in base.py and is described in this section. The Respirato
 
 Calibration is performed by acquiring some frames and performing eulerian magnification in order to isolate a rectangular Region of Interest (ROI) in which the right frequency properties are present for a respiratory signal to be measured. It is computationally expensive compared to the rest of the algorithm and is only run at the beginning and if the signal is no longer viable.
 
-Eulerian magnification is performed by first constructing a Laplacian-Gaussian image pyramid for each frame in the video, and then performing a Fourier Transform along the temporal axis for each pixel at each scale. The resulting frequency pyramid is then collapsed and averaged along the temporal axis to get a single image which acts as a "heatmap" for the locations in the image where a particular frequency is common. This image is then thresholded and the largest contour is isolated for later measurement. This largest contour's bounding box is the ROI.
+Eulerian magnification is performed by first constructing a [Laplacian-Gaussian image pyramid](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_pyramids/py_pyramids.html) for each frame in the video, and then performing a [Fourier Transform](https://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html) along the temporal axis for each pixel at each scale. 
+
+
+
+The resulting frequency pyramid is then collapsed and averaged along the temporal axis to get a single image which acts as a "heatmap" for the locations in the image where a particular frequency is common. This image is then thresholded and the largest contour is isolated for later measurement. This largest contour's bounding box is the ROI.
+
+
 
 ### Motion Measurement
 
