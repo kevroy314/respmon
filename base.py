@@ -111,7 +111,7 @@ class RespiratoryMonitor:
         # Target Bounding Box
         self.x, self.y, self.w, self.h = None, None, None, None
 
-        self.enable_error_detection = False
+        self.disable_error_detection = False
 
         self.calibration_buffer_idx = 0
         self.calibration_buffer = np.zeros((self.calibration_buffer_target_length, self.height, self.width),
@@ -135,6 +135,8 @@ class RespiratoryMonitor:
         self.display_frame = None
         self.motion_key_points = None
         self.video_out = None
+
+        self.error_message = None
 
         self.buffers = [self.data, self.confidence, self.t, self.freq, self.num_peaks, self.num_peaks_mean,
                         self.motion_data]
@@ -242,6 +244,12 @@ class RespiratoryMonitor:
         for plot in self.ui["plots"]:
             plot.setXRange(low, high, padding=0)
 
+    def trigger_error(self, msg=""):
+        self.state = 'error'
+        self.error_message = msg
+        logging.warning("Error triggered: {0}".format(msg))
+        self.reset_start_time = time.time()
+
     def update_ui(self):
         if self.visualize == 'pyqtgraph':
             if self.state == "calibration":
@@ -278,12 +286,8 @@ class RespiratoryMonitor:
                 if len(self.freq) >= 2 and len(self.t) >= 2:
                     self.ui["frequency_plot"].setData(np.array(self.t)[-len(self.freq):], self.freq)
                     self.ui["bpm_text"].setText('{0:#.4} BPM'.format(self.freq[-1]))
-                # if len(self.confidence) >= 2:
-                #     ci_top, ci_bottom = np.transpose(self.confidence)
-                #     ci_t = np.array(self.t)[-len(ci_top):]
-                #     self.ui["top_confidence_interval"].setData(ci_t, ci_top)
-                #     self.ui["bottom_confidence_interval"].setData(ci_t, ci_bottom)
             elif self.state == "error":
+                self.ui["bpm_text"].setText('??? BPM')
                 self.set_window_title(
                     "Error: Recalibrating due to poor signal in {0}s.".format(
                         self.error_reset_delay - (time.time()-self.reset_start_time)))
@@ -358,11 +362,15 @@ class RespiratoryMonitor:
                 self.previous_cropped_image = float_to_uint8(self.cropped_image.copy())
                 self.motion_key_points = cv2.goodFeaturesToTrack(self.previous_cropped_image,
                                                                  mask=None, **self.feature_params)
+                if len(self.motion_key_points) < 1:
+                    self.trigger_error("No motion key points found.")
                 return 0.0
 
             p1, st, err = cv2.calcOpticalFlowPyrLK(self.previous_cropped_image, float_to_uint8(self.cropped_image),
                                                    self.motion_key_points, None, **self.lk_params)
-            # TODO: Check for no points
+            if p1 is None:
+                return np.nan
+
             # Select good points
             good_new = p1[st == 1]
             good_old = self.motion_key_points[st == 1]
@@ -472,9 +480,8 @@ class RespiratoryMonitor:
                     # Perform the measurement
                     self.measure()
                     # Look for errors
-                    if self.enable_error_detection and self.detect_errors():
-                        self.state = 'error'
-                        self.reset_start_time = time.time()
+                    if not self.disable_error_detection and self.detect_errors():
+                        self.trigger_error("error detection found poor signal")
             elif self.state == 'error':
                 if time.time() - self.reset_start_time >= self.error_reset_delay:
                     self.reset()
@@ -495,15 +502,23 @@ class RespiratoryMonitor:
 
     def reset(self):
         self.state = 'initialize'
-        self.data.clear()
-        self.confidence.clear()
-        self.freq.clear()
-        self.t.clear()
-        self.num_peaks.clear()
-        self.num_peaks_mean.clear()
-        for key in self.ui:
-            if callable(getattr(self.ui[key], "clear", None)):
-                self.ui[key].clear()
+        for buffer in self.buffers:
+            buffer.clear()
+        self.ui["raw_signal"].clear()
+        # "capture_image": capture_image
+        self.ui["frequency_plot"].clear()
+        self.ui["peak_plot"].clear()
+        self.ui["bpm_text"].setText("??? BPM")
+        self.ui["top_confidence_interval"].clear()
+        self.ui["bottom_confidence_interval"].clear()
+        self.ui["fitted_plot"].clear()
+        self.filtered_data = []
+        self.peak_indices = []
+        self.peak_times = []
+        self.calibration_buffer_idx = 0
+        if self.video_out is not None:
+            self.video_out.release()
+            self.video_out = None
 
     def sync_to_fps(self):
         fps_x = self.fps
@@ -514,7 +529,8 @@ class RespiratoryMonitor:
             time.sleep(sleep_time)
 
     def detect_errors(self):
-        raise NotImplementedError()
+        if self.data[-1] is np.nan:
+            return True
 
     @staticmethod
     def locate(calibration_video_data, fps,
