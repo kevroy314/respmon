@@ -19,7 +19,7 @@ This will run the main file, which you can modify to determine the video source 
 
 The core algorithm is in base.py and is described in this section. The RespiratoryMonitor object contains a state machine which is initalized using the run() function. The state machine operates as follows:
 
-<Insert state machine figure>
+![State Diagram](https://github.com/kevroy314/respmon/raw/master/images/state.png)
   
 ### Calibration
 
