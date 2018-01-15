@@ -1,6 +1,7 @@
 import scipy.fftpack
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 
 def show_frequencies(vid_data, fps, bounds=None):
@@ -45,12 +46,37 @@ def show_frequencies(vid_data, fps, bounds=None):
 
 
 def reduce_bounding_box(x, y, w, h, maximum_area):
-    start_area = w*h
+    start_area = w * h
     if start_area <= maximum_area:
         return x, y, w, h
-    shrink_proportion = np.sqrt((float(maximum_area)/float(start_area)))
+    shrink_proportion = np.sqrt((float(maximum_area) / float(start_area)))
     new_w = w * shrink_proportion
     new_h = h * shrink_proportion
     new_x = x + ((w - new_w) / 2.)
     new_y = y + ((h - new_h) / 2.)
     return int(np.round(new_x)), int(np.round(new_y)), int(np.round(new_w)), int(np.round(new_h))
+
+
+class Benchmarker:
+    def __init__(self):
+        self.starts = dict()
+        self.ticks = dict()
+
+    def add_tag(self, tag):
+        self.ticks[tag] = []
+
+    def tick_start(self, tag):
+        self.starts[tag] = time.time()
+
+    def tick_end(self, tag):
+        self.ticks[tag].append(time.time() - self.starts[tag])
+
+    def get_report(self):
+        return 'Tag, Average Time (seconds), Iterations\r\n' + \
+               '\r\n'.join(['{0}, {1}, {2}'.format(tag, rate, iterations) for
+                            tag, rate, iterations in zip(self.ticks.keys(),
+                                                         [np.mean(l) for l in self.ticks.values()],
+                                                         [len(l) for l in self.ticks.values()])])
+
+    def has_tag(self, tag):
+        return tag in self.ticks

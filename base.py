@@ -9,7 +9,7 @@ import pyqtgraph as pg
 from tqdm import tqdm
 from collections import deque
 from pyqtgraph.Qt import QtGui
-from tools import reduce_bounding_box
+from tools import reduce_bounding_box, Benchmarker
 from transforms import uint8_to_float, float_to_uint8, eulerian_magnification_bandpass, butter_lowpass_filter
 
 
@@ -32,6 +32,8 @@ class RespiratoryMonitor:
         assert isinstance(save_all_data, bool), "save_all_data should be bool"
         assert motion_extraction_method == "average" or motion_extraction_method == "flow", \
             "motion_extraction_method must be 'average' or 'flow'"
+
+        self.benchmarker = Benchmarker()
 
         self.error_reset_delay = error_reset_delay
         self.save_all_data = save_all_data
@@ -405,13 +407,18 @@ class RespiratoryMonitor:
                 return 0.0
 
     def run(self):
+        self.benchmarker.add_tag('Measurement Loop')
+        self.benchmarker.add_tag('Frame Capture')
+        self.benchmarker.add_tag('Calibration Measurement')
         while self.cap.isOpened():
             self.loop_start_time = time.time()
 
+            self.benchmarker.tick_start('Frame Capture')
             # Capture the frame (quit if the frame is a bool, meaning end of stream)
             self.current_frame = self.next_frame()
             if isinstance(self.current_frame, bool):
                 break
+            self.benchmarker.tick_end('Frame Capture')
 
             if self.state == 'initialize':
                 self.initialize()
@@ -432,12 +439,14 @@ class RespiratoryMonitor:
                     self.detect_fps()
                     # Fill FPS dependent variables
                     self.peak_minimum_sample_distance = int(np.floor(self.fps / self.freq_max))
+                    self.benchmarker.tick_start('Calibration Measurement')
                     # Run the localizer
                     location = self.locate(self.calibration_buffer, self.fps,
                                            save_calibration_image=self.save_calibration_image,
                                            freq_min=self.freq_min, freq_max=self.freq_max,
                                            temporal_threshold=self.temporal_threshold,
                                            threshold=int(np.round(self.threshold*255)))
+                    self.benchmarker.tick_end('Calibration Measurement')
                     # If the localizer fails, try again
                     if location is None:
                         logging.info("Failed finding ROI during calibration. Retrying...")
@@ -457,6 +466,7 @@ class RespiratoryMonitor:
                     self.video_out = cv2.VideoWriter(str(self.capture_target) + '.avi',
                                                      cv2.VideoWriter_fourcc(*'MSVC'),
                                                      self.fps, (self.w, self.h))
+                self.benchmarker.tick_start('Measurement Loop')
                 # Crop to the bounding box
                 self.cropped_image = self.current_frame[self.y: self.y + self.h, self.x: self.x + self.w]
                 # Check for full buffer and popleft
@@ -482,8 +492,10 @@ class RespiratoryMonitor:
                     # Look for errors
                     if not self.disable_error_detection and self.detect_errors():
                         self.trigger_error("error detection found poor signal")
+                self.benchmarker.tick_end('Measurement Loop')
             elif self.state == 'error':
                 if time.time() - self.reset_start_time >= self.error_reset_delay:
+                    logging.info('Benchmark Report...\r\n' + self.benchmarker.get_report())
                     self.reset()
                     self.state = 'calibration'
 
